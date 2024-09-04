@@ -17,8 +17,10 @@ pub enum ThermiteError {
     IoError(#[from] io::Error),
     #[error("{0}")]
     UnknownError(String),
+    #[cfg(feature = "api")]
     #[error("Error making network request: {0}")]
     NetworkError(Box<ureq::Error>),
+    #[cfg(feature = "api")]
     #[error(transparent)]
     ZipError(#[from] zip::result::ZipError),
     #[error("Error parsing JSON: {0}")]
@@ -42,6 +44,7 @@ pub enum ThermiteError {
 }
 
 // ureq::Error is ~240 bytes so we store it in a box
+#[cfg(feature = "api")]
 impl From<ureq::Error> for ThermiteError {
     fn from(value: ureq::Error) -> Self {
         Self::NetworkError(Box::new(value))
@@ -61,6 +64,7 @@ impl From<serde_json::Error> for ThermiteError {
 }
 
 #[cfg(test)]
+#[cfg(feature = "api")]
 mod test {
     use ureq::ErrorKind;
 
@@ -68,15 +72,16 @@ mod test {
 
     #[test]
     fn from_ureq() {
-        let err = ureq::get("http://your_mother:8008").call().expect_err("How");
+        let err = ureq::get("http://your_mother:8008")
+            .call()
+            .expect_err("How");
 
         let thermite_err = ThermiteError::from(err);
-        
+
         if let ThermiteError::NetworkError(u) = thermite_err {
             assert_eq!(u.kind(), ErrorKind::Dns);
         } else {
             panic!("Unexpected error type: {:?}", thermite_err);
         }
     }
-
 }

@@ -14,6 +14,7 @@
 //! }
 //! ```
 
+#[cfg(feature = "api")]
 pub mod api;
 pub mod core;
 pub mod error;
@@ -32,6 +33,7 @@ pub const TITANFALL2_STEAM_ID: u32 = 1237970;
 pub const TITANFALL2_ORIGIN_IDS: [&str; 2] = ["Origin.OFR.50.0001452", "Origin.OFR.50.0001456"];
 
 // Important functions and structs
+#[cfg(all(feature = "api", feature = "utils", feature = "manage"))]
 pub mod prelude {
     pub use crate::api::get_package_index;
     pub use crate::core::manage::{
